@@ -4,17 +4,15 @@ import { createResponse } from "./util/response-handler";
 require("pg");
 
 const sequelize = new Sequelize(
-  `postgres://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_URL}:5432/postgres`
+  `postgres://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:5432/postgres`,
+  {
+    dialect: 'postgres'
+  }
 );
 
 const Food = sequelize.define(
   "food",
   {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -26,11 +24,12 @@ const Food = sequelize.define(
   },
   { timestamps: false }
 );
+Food.removeAttribute('id');
 
 sequelize
   .authenticate()
   .then(() => console.log("Connection made"))
-  .catch(() => console.error("Unable to connect"));
+  .catch((err) => console.error("Unable to connect", err));
 
 exports.getAllFoods = async (_event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -67,8 +66,8 @@ exports.addFood = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   const eventBody = JSON.parse(event.body);
   try {
-    const foodName = eventBody.name;
-    const foodNotes = eventBody.notes || "";
+    const foodName: string = eventBody.name;
+    const foodNotes: string = eventBody.notes || "";
     if (foodName) {
       const food = await Food.create({ name: foodName, notes: foodNotes });
       return createResponse(200, food);
@@ -76,6 +75,7 @@ exports.addFood = async (event, context) => {
       return createResponse(400, { message: "No name found in body" });
     }
   } catch (err) {
+    console.log(err);
     return createResponse(400, err);
   }
 };
