@@ -60,6 +60,7 @@ exports.getFoodById = async (event, context) => {
   } catch (err) {
     return createResponse(400, err);
   }
+  
 };
 
 exports.addFood = async (event, context) => {
