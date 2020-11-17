@@ -1,0 +1,45 @@
+plugins:
+  - serverless-plugin-typescript
+
+service: practice-sls
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  vpc:
+    securityGroupIds:
+      - sg-5ea0900c
+    subnetIds:
+      - subnet-eadd09a7
+      - subnet-0225245e
+      - subnet-c52427eb
+      - subnet-2e847a20
+      - subnet-24733b1a
+      - subnet-3aaca95d
+
+functions:
+  getAllFoods:
+    handler: src/handler.getAllFoods
+    events:
+      - http:
+          path: foods
+          method: get
+
+  getFoodById:
+    handler: src/handler.getFoodById
+    events:
+      - http:
+          path: foods/{id}
+          method: get
+          request:
+            parameters:
+              paths:
+                id: true
+              
+  addFood:
+    handler: src/handler.addFood
+    events:
+      - http:
+          path: foods
+          method: post
