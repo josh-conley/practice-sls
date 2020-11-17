@@ -1,10 +1,10 @@
 "use strict";
-import { Sequelize, QueryTypes, DataTypes } from "sequelize";
+import { Sequelize, DataTypes } from "sequelize";
 import { createResponse } from "./util/response-handler";
 require("pg");
 
 const sequelize = new Sequelize(
-  "postgres://josh:josh@jconley.coamwry8rhzq.us-east-1.rds.amazonaws.com:5432/postgres"
+  `postgres://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_URL}:5432/postgres`
 );
 
 const Food = sequelize.define(

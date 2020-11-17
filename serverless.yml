@@ -7,6 +7,10 @@ frameworkVersion: "2"
 provider:
   name: aws
   runtime: nodejs12.x
+  environment:
+    DB_USER: ${file(properties.yml):db_user}
+    DB_PASS: ${file(properties.yml):db_pass}
+    DB_HOST: ${file(properties.yml):db_host}
   vpc:
     securityGroupIds:
       - sg-5ea0900c
@@ -36,7 +40,7 @@ functions:
             parameters:
               paths:
                 id: true
-              
+
   addFood:
     handler: src/handler.addFood
     events:
