@@ -1,0 +1,27 @@
+{
+  "name": "practice-sls",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/handler.js",
+  "types": "dist/handler.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/handler.ts",
+    "start:watch": "nodemon --watch src --exec ts-node src/handler.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "add": "^2.0.6",
+    "nodemon": "^2.0.6",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {
+    "pg": "^8.5.1",
+    "sequelize": "^6.3.5",
+    "serverless-plugin-typescript": "^1.1.9"
+  }
+}
