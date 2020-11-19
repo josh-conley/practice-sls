@@ -58,6 +58,9 @@ exports.getFoodById = async (event, context) => {
     const foodId: string = event.pathParameters.id;
     if (foodId) {
       const food = await Food.findByPk(foodId);
+      if (!food) {
+        return createResponse(200, { message: "No food found", data: food });
+      }
       return createResponse(200, { message: "Food found", data: food });
     } else {
       return createResponse(400, { message: "No id found in path", data: null });
