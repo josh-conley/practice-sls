@@ -10,9 +10,21 @@ const sequelize = new Sequelize(
   }
 );
 
+type FoodType = {
+  id: number,
+  name: string,
+  notes: string
+}
+
 const Food = sequelize.define(
   "food",
   {
+    id: {
+      type: DataTypes.NUMBER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -24,7 +36,6 @@ const Food = sequelize.define(
   },
   { timestamps: false }
 );
-Food.removeAttribute('id');
 
 sequelize
   .authenticate()
@@ -35,31 +46,26 @@ exports.getAllFoods = async (_event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   try {
     const foods = await Food.findAll({ attributes: ["id", "name", "notes"] });
-    return createResponse(200, foods);
+    return createResponse(200, { message: "Foods found", data: foods });
   } catch (err) {
-    return createResponse(400, err);
+    return createResponse(500, err);
   }
 };
 
 exports.getFoodById = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   try {
-    const foodId = event.pathParameters.id;
+    const foodId: string = event.pathParameters.id;
     if (foodId) {
-      const food = await Food.findAll({
-        attributes: ["id", "name", "notes"],
-        where: {
-          id: foodId,
-        },
-      });
-      return createResponse(200, food);
+      const food = await Food.findByPk(foodId);
+      return createResponse(200, { message: "Food found", data: food });
     } else {
-      return createResponse(400, "No id found in path");
+      return createResponse(400, { message: "No id found in path", data: null });
     }
   } catch (err) {
-    return createResponse(400, err);
+    return createResponse(500, err);
   }
-  
+
 };
 
 exports.addFood = async (event, context) => {
@@ -70,12 +76,57 @@ exports.addFood = async (event, context) => {
     const foodNotes: string = eventBody.notes || "";
     if (foodName) {
       const food = await Food.create({ name: foodName, notes: foodNotes });
-      return createResponse(200, food);
+      return createResponse(200, { message: "Food added", data: food });
     } else {
-      return createResponse(400, { message: "No name found in body" });
+      return createResponse(400, { message: "No name found in body", data: null });
     }
   } catch (err) {
     console.log(err);
-    return createResponse(400, err);
+    return createResponse(500, err);
+  }
+};
+
+exports.updateFood = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+  const eventBody = JSON.parse(event.body);
+  try {
+    const foodId: number = eventBody.id;
+    const foodName: string = eventBody.name;
+    const foodNotes: string = eventBody.notes || "";
+    if (foodId) {
+      const food = await Food.findByPk(foodId);
+      const foodObj: FoodType = food.toJSON() as FoodType;
+      food.set("name", foodName || foodObj.name);
+      food.set("notes", foodNotes || foodObj.notes);
+      const updateResult = await food.save();
+      return createResponse(200, { message: "Food updated", data: updateResult });
+    } else {
+      return createResponse(400, { message: "No updated fields provided", data: null });
+    }
+  } catch (err) {
+    console.log(err);
+    return createResponse(500, err);
+  }
+};
+
+exports.deleteFood = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+  try {
+    const foodId: number = event.pathParameters.id;
+    if (foodId) {
+      const food = await Food.findByPk(foodId);
+
+      if (!food) {
+        return createResponse(200, { message: "ID not found", data: null });
+      }
+
+      await food.destroy();
+      return createResponse(200, { message: "Food deleted", data: foodId });
+    } else {
+      return createResponse(400, { message: "No Food ID provided in path", data: null });
+    }
+  } catch (err) {
+    console.log(err);
+    return createResponse(500, err);
   }
 };

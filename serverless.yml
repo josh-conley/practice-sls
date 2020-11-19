@@ -47,3 +47,21 @@ functions:
       - http:
           path: foods
           method: post
+
+  updateFood:
+    handler: src/handler.updateFood
+    events:
+      - http:
+          path: foods
+          method: put
+
+  deleteFood:
+    handler: src/handler.deleteFood
+    events:
+      - http:
+          path: foods/{id}
+          method: delete
+          request:
+            parameters:
+              paths:
+                id: true
